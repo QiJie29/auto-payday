@@ -3,6 +3,7 @@ import subprocess
 import time
 import os
 import logging
+from datetime import datetime, timedelta
 
 from bilibili_api import Credential
 from bilibili_api.channel_series import add_aids_to_series
@@ -36,7 +37,7 @@ def custom_process(file_path):
     video_file = os.path.splitext(file_path)[0] + '.mp4'
     ass_file = os.path.splitext(file_path)[0] + '.ass'
     events = parse.parse_douyu_danmaku(file_path)
-    # parse.events_to_ass(events, ass_file)
+    parse.events_to_ass(events, ass_file)
 
     # 3、调用 FFmpeg 压制视频
     # video_danmu_file = os.path.splitext(file_path)[0] + '弹幕版.mp4'
@@ -61,10 +62,13 @@ def custom_process(file_path):
     ass_path = ass_file
     video_path = video_file
     # 传入视频及弹幕文件进行智能切片,对一段视频提取 3 条高能片段，每个片段 300 秒，允许最大重叠 60 秒。
+    logging.info("切片开始")
     output_video_path = slice_video_by_danmaku(ass_path, video_path, 300, 3, 60, 1)
+    logging.info("切片结束")
 
     # 5、上传自媒体网站
     for path in output_video_path:
+        logging.info(path)
         asyncio.run(upload.upload(path))
         # asyncio.run(upload.list_all_my_series())
 
@@ -74,15 +78,25 @@ def custom_process(file_path):
         #     bili_jct="f43703674f1c47995c218f600a45099b",
         #     buvid3="你的 buvid3" # 有时需要，可选
         # )
-        # asyncio.run(upload.add_to_series(116742814766742,8319296,credential))
-        break
+        # asyncio.run(upload.list_all_my_series())
+        # break
     # 运行批量上传
     # asyncio.run(upload.upload_multiple(output_video_path, 8319296))
     # 6、检测上传成功后，删除源文件释放空间
+    os.remove(file_path)
+    logging.info("文件已清理：" + file_path)
+    os.remove(ass_path)
+    logging.info("文件已清理：" + ass_path)
+    os.remove(video_path)
+    logging.info("文件已清理：" + video_path)
+
+    for path in output_video_path:
+        os.remove(Path(path))
+        logging.info("文件已清理：" + path)
 
 
     logging.info(f"处理完成: {file_path}")
-    input("按回车键退出...")
+    # input("按回车键退出...")
 
 class VideoHandler(FileSystemEventHandler):
     """视频文件事件处理器（带异常保护）"""
@@ -130,3 +144,56 @@ def start_monitoring():
             observer.join()
             logging.warning("监控服务已停止，5秒后尝试重启...")
             time.sleep(5)
+
+
+def check_files(directory_path, interval=60):
+    """
+    定时检查目录下所有XML文件的最后修改时间
+
+    参数:
+        directory_path: 要监控的目录路径
+        interval: 检查间隔（秒），默认60秒
+    """
+    while True:
+        try:
+            current_time = datetime.now()
+            # 计算5分钟前的时间点
+            five_minutes_ago = current_time - timedelta(minutes=5)
+
+            # 遍历目录下所有XML文件
+            for filename in os.listdir(directory_path):
+                if filename.lower().endswith('.xml'):
+                    file_path = os.path.join(directory_path, filename)
+
+                    # 获取文件的最后修改时间
+                    if os.path.isfile(file_path):
+                        mod_timestamp = os.path.getmtime(file_path)
+                        mod_time = datetime.fromtimestamp(mod_timestamp)
+
+                        # 判断是否早于5分钟前
+                        if mod_time < five_minutes_ago:
+                            custom_process(file_path)
+
+        except Exception as e:
+            print(f"扫描过程中出错: {e}")
+
+        # 等待设定的间隔时间后再次检查
+        time.sleep(interval)
+
+
+# def start_timer(directory_path, interval=60, daemon=False):
+#     """
+#     启动定时器线程
+#
+#     参数:
+#         directory_path: 要监控的目录路径
+#         interval: 检查间隔（秒），默认60秒
+#         daemon: 是否作为守护线程运行
+#     """
+#     timer_thread = threading.Thread(
+#         target=check_files,
+#         args=(directory_path, interval),
+#         daemon=daemon
+#     )
+#     timer_thread.start()
+#     return timer_thread
