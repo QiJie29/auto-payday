@@ -14,17 +14,14 @@ from pathlib import Path
 from autosv import slice_video_by_danmaku
 
 import upload
+from config import get_value_by_key_recursive
 
 # 配置日志（便于排查问题）
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-# --- 配置区 ---
-WATCH_DIRECTORY = r"C:\Users\JQJ\Downloads\斗鱼\ok林仔"  # 请替换为你的监控目录
-VIDEO_EXTENSIONS = ['.xml']  # 需要监控的视频格式
 
-
-def custom_process(file_path):
+async def custom_process(file_path):
     """
     自定义处理函数：视频文件写入完成后执行的操作
     请根据实际需求修改此函数内容
@@ -33,12 +30,14 @@ def custom_process(file_path):
     # 示例：打印文件大小
     file_size = os.path.getsize(file_path) / (1024 * 1024)
     logging.info(f"文件大小: {file_size:.2f} MB")
+
     # 2、录制完成后将弹幕从xml转换为ass格式
-    video_file = os.path.splitext(file_path)[0] + '.mp4'
+    video_file = os.path.splitext(file_path)[0] + '.flv'
     ass_file = os.path.splitext(file_path)[0] + '.ass'
     events = parse.parse_douyu_danmaku(file_path)
+    logging.info("生成ass文件开始")
     parse.events_to_ass(events, ass_file)
-
+    logging.info("生成ass文件结束")
     # 3、调用 FFmpeg 压制视频
     # video_danmu_file = os.path.splitext(file_path)[0] + '弹幕版.mp4'
     #
@@ -66,87 +65,33 @@ def custom_process(file_path):
     output_video_path = slice_video_by_danmaku(ass_path, video_path, 300, 3, 60, 1)
     logging.info("切片结束")
 
+    cover_url = os.path.splitext(file_path)[0] + '.jpg'
     # 5、上传自媒体网站
     for path in output_video_path:
         logging.info(path)
-        asyncio.run(upload.upload(path))
-        # asyncio.run(upload.list_all_my_series())
+        await upload.upload_to_bilibili("猪小杰123",path,cover_url)
 
-        # 1. 设置认证信息
-        # credential = Credential(
-        #     sessdata="e35e940a%2C1796701790%2Cf657a%2A62CjDo4ZTHqe_im7o2GTvVCOFuhq6Q9nogBxwSXHBAwQDpBur1ebWUonTK9r43GjU7sgYSVmFTZ1owU2d5dlQwYnNud2NCTG9fVHZnZlRHYlVjMmRrX1dVdEZVSEZjQVlKSXREQVNIeUszUS1FYVBaOXdJMndwSGoyWnpWNGJzVmpIT1JSai1uMmxRIIEC",
-        #     bili_jct="f43703674f1c47995c218f600a45099b",
-        #     buvid3="你的 buvid3" # 有时需要，可选
-        # )
-        # asyncio.run(upload.list_all_my_series())
-        # break
-    # 运行批量上传
-    # asyncio.run(upload.upload_multiple(output_video_path, 8319296))
+    logging.info("开始清理文件")
     # 6、检测上传成功后，删除源文件释放空间
     os.remove(file_path)
-    logging.info("文件已清理：" + file_path)
+    logging.info(f"文件已清理：{file_path}" )
     os.remove(ass_path)
-    logging.info("文件已清理：" + ass_path)
+    logging.info(f"文件已清理：{ass_path}")
     os.remove(video_path)
-    logging.info("文件已清理：" + video_path)
+    logging.info(f"文件已清理：{video_path}")
+
 
     for path in output_video_path:
         os.remove(Path(path))
-        logging.info("文件已清理：" + path)
-
+        logging.info(f"文件已清理：{path}")
+    os.remove(cover_url)
+    logging.info(f"文件已清理：{cover_url}")
 
     logging.info(f"处理完成: {file_path}")
     # input("按回车键退出...")
 
-class VideoHandler(FileSystemEventHandler):
-    """视频文件事件处理器（带异常保护）"""
-
-    def on_closed(self, event):
-        """文件关闭时触发（表示写入完成）"""
-        if event.is_directory:
-            return
-
-        file_path = event.src_path
-        file_ext = os.path.splitext(file_path)[1].lower()
-
-        if file_ext in VIDEO_EXTENSIONS:
-            logging.info(f"检测到视频写入完成: {file_path}")
-            try:
-                # 调用自定义处理函数
-                custom_process(file_path)
-            except Exception as e:
-                logging.error(f"处理文件 {file_path} 时发生错误: {e}", exc_info=True)
-
-    def on_modified(self, event):
-        """文件修改时触发（用于记录进度，可选）"""
-        if not event.is_directory:
-            logging.info(f"文件正在写入: {event.src_path}")
-
-
-def start_monitoring():
-    """启动监控（带自动恢复的无限循环）"""
-    while True:
-        event_handler = VideoHandler()
-        observer = Observer()
-        observer.schedule(event_handler, WATCH_DIRECTORY, recursive=False)
-
-        logging.info(f"开始监控目录: {WATCH_DIRECTORY}")
-        observer.start()
-
-        try:
-            # 保持主线程运行，每秒检查一次 observer 是否存活
-            while observer.is_alive():
-                time.sleep(1)
-        except Exception as e:
-            logging.error(f"监控服务发生异常: {e}", exc_info=True)
-        finally:
-            observer.stop()
-            observer.join()
-            logging.warning("监控服务已停止，5秒后尝试重启...")
-            time.sleep(5)
-
-
-def check_files(directory_path, interval=60):
+# 检测xml文件最后修改时间，如果大于5分钟，则开始执行切片上传操作
+async def check_files(directory_path, interval=60):
     """
     定时检查目录下所有XML文件的最后修改时间
 
@@ -197,3 +142,40 @@ def check_files(directory_path, interval=60):
 #     )
 #     timer_thread.start()
 #     return timer_thread
+
+async def check_and_process(directory, interval=60, delay_minutes=5):
+    """
+    监控单个目录
+    """
+    processed = set()
+
+    while True:
+        try:
+            # 查找所有XML文件
+            xml_files = Path(directory).rglob("*.xml")
+
+            for file_path in xml_files:
+                if not file_path.is_file():
+                    continue
+
+                # 检查修改时间
+                mtime = os.path.getmtime(file_path)
+                file_time = datetime.fromtimestamp(mtime)
+
+                if datetime.now() - file_time >= timedelta(minutes=delay_minutes):
+                    if str(file_path) not in processed:
+                        print(f"[{datetime.now()}] 处理: {file_path}")
+
+                        # ===== 你的自定义代码 =====
+                        # 在这里写你要执行的操作
+                        await custom_process(file_path)
+                        # 例如：读取XML、调用API等
+                        # =========================
+
+                        processed.add(str(file_path))
+
+            await asyncio.sleep(interval)
+
+        except Exception as e:
+            print(f"错误: {e}")
+            await asyncio.sleep(interval)
