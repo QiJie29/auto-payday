@@ -7,7 +7,7 @@ from pathlib import Path
 from bilibili_api import sync, video_uploader, Credential, user, channel_series, video
 from bilibili_api.utils.network import Api
 
-from config import load_json_config,get_value_by_key_recursive
+import utils
 
 
 async def wait_for_video_ready(cut_video_url: str,bvid: str, credential: Credential, check_interval: int = 5, max_wait: int = 3600):
@@ -63,10 +63,10 @@ async def wait_for_video_ready(cut_video_url: str,bvid: str, credential: Credent
 async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     # 1. 设置认证信息
     # B站用户cookie等数据
-    config = load_json_config('config.json')
+    config = utils.load_json_config('config.json')
     credential = Credential(
-        sessdata=get_value_by_key_recursive(config,"uname",uname,"sessdata"),
-        bili_jct=get_value_by_key_recursive(config,"uname",uname,"bili_jct"),
+        sessdata=utils.get_value_by_key_recursive(config,"uname",uname,"sessdata"),
+        bili_jct=utils.get_value_by_key_recursive(config,"uname",uname,"bili_jct"),
         # buvid3="你的buvid3"  # 可选
     )
 
@@ -74,9 +74,9 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     # 从视频路径中提取时间信息
     time = Path(cut_video_url).stem.split('_', 1)[1]
     # 从视频路径中的父目录提取主播名称
-    up = get_value_by_key_recursive(config,"xml_url",os.path.dirname(cut_video_url),"up")
-    tid = get_value_by_key_recursive(config,"xml_url",os.path.dirname(cut_video_url),"tid")
-    tags = get_value_by_key_recursive(config, "xml_url", os.path.dirname(cut_video_url), "tags")
+    up = utils.get_value_by_key_recursive(config,"xml_url",os.path.dirname(cut_video_url),"up")
+    tid = utils.get_value_by_key_recursive(config,"xml_url",os.path.dirname(cut_video_url),"tid")
+    tags = utils.get_value_by_key_recursive(config, "xml_url", os.path.dirname(cut_video_url), "tags")
 
     title = f"【{up}】{time}直播精彩片段"
     vu_meta = video_uploader.VideoMeta(

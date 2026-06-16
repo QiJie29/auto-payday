@@ -4,15 +4,14 @@ from pathlib import Path
 import bilibili_api
 from autosv import slice_video_by_danmaku
 import os
-from config import load_json_config
-from config import load_json_config,get_value_by_key_recursive
 
+import utils
 import watch_dog
 
 
 async def main():
     # 你的监控路径列表
-    config = load_json_config('config.json')
+    config = utils.load_json_config('config.json')
 
     # directories = [
     #     get_value_by_key_recursive(config, "up", "OK林仔", "xml_url"),

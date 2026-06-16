@@ -1,17 +1,16 @@
+import asyncio
+import logging
 import os
+import subprocess
 from pathlib import Path
 
-from config import load_json_config
-from config import get_value_by_key_recursive
+import upload
+import utils
 
 if __name__ == '__main__':
-    # path = r'C:\Users\JQJ\Downloads\斗鱼\ok林仔\test/2902s_2026-06-12 12-07-29-219 顶级一号位教学，五黑有位置.mp4'
-    # os.remove(path)
-    config = load_json_config('config.json')
-    # print(config['live_stream'])
-
-    result = get_value_by_key_recursive(config, "up", "Minana呀", "xml_url")
-    print(result)  # 输出: e35e940a...
-
-    cut_video_url = r"1819s_2026-06-13 23-15-13-308 宝宝 晚上好～.mp4"
-    print(Path(cut_video_url).stem)
+    # 出现故障后单点上传
+    base_path = r"C:\Users\JQJ\Downloads\斗鱼\debug"
+    path = f"{base_path}\\3474s_2026-06-15 21-12-10-249 顶级一号位教学，五黑有位置弹幕版.flv"
+    cover_url = f"{base_path}\\2026-06-15 21-12-10-249 顶级一号位教学，五黑有位置.jpg"
+    # asyncio.run(upload.upload_to_bilibili("猪小杰123",path,cover_url))
+    utils.delete_files_containing_keyword(Path(cover_url).parent, Path(cover_url).stem, False, False)

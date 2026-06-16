@@ -9,85 +9,61 @@ from bilibili_api import Credential
 from bilibili_api.channel_series import add_aids_to_series
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-import parse
+
 from pathlib import Path
 from autosv import slice_video_by_danmaku
 
+
 import upload
-from config import get_value_by_key_recursive
+import utils
 
 # 配置日志（便于排查问题）
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-async def custom_process(file_path):
+async def custom_process(xml_url):
     """
     自定义处理函数：视频文件写入完成后执行的操作
     请根据实际需求修改此函数内容
     """
-    logging.info(f"开始处理视频文件: {file_path}")
+    logging.info(f"开始处理视频文件: {xml_url}")
     # 示例：打印文件大小
-    file_size = os.path.getsize(file_path) / (1024 * 1024)
+    file_size = os.path.getsize(xml_url) / (1024 * 1024)
     logging.info(f"文件大小: {file_size:.2f} MB")
 
     # 2、录制完成后将弹幕从xml转换为ass格式
-    video_file = os.path.splitext(file_path)[0] + '.flv'
-    ass_file = os.path.splitext(file_path)[0] + '.ass'
-    events = parse.parse_douyu_danmaku(file_path)
-    logging.info("生成ass文件开始")
-    parse.events_to_ass(events, ass_file)
-    logging.info("生成ass文件结束")
-    # 3、调用 FFmpeg 压制视频
-    # video_danmu_file = os.path.splitext(file_path)[0] + '弹幕版.mp4'
-    #
-    # work_dir = Path(file_path).parent
-    # original_dir = os.getcwd()
-    # try:
-    #     os.chdir(work_dir)
-    #     # 相对路径（仅文件名，不含目录）
-    #     video_name = Path(video_file).name
-    #     ass_name = Path(ass_file).name
-    #     output_name = Path(video_danmu_file).name
-    #     cmd = f'ffmpeg -i "{video_name}" -vf "ass={ass_name}" -c:a copy "{output_name}"'
-    #     subprocess.run(cmd, shell=True, check=True)
-    #     logging.info(f"弹幕压制成功: {video_danmu_file}")
-    # except subprocess.CalledProcessError as e:
-    #     logging.error(f"FFmpeg 执行失败: {e}")
-    # finally:
-    #     os.chdir(original_dir)  # 恢复原工作目录
+    logging.info(f"生成ass文件开始")
+    ass_url = utils.parse_douyu_danmaku(xml_url)
+    # ass_url = f'{Path(xml_url).parent}\\2026-06-16 01-42-23-397 顶级一号位教学，五黑有位置 by bililive-tools.ass'
+    logging.info(f"生成ass文件结束{ass_url}")
+
+    video_url = os.path.splitext(xml_url)[0] + '.flv'
+    config = utils.load_json_config('config.json')
+    if utils.get_value_by_key_recursive(config,"up","OK林仔","press_danmu_to_video") :
+        # 3、调用 FFmpeg 压制视频
+        logging.info(f"压制弹幕视频开始")
+        video_danmu_url = utils.press_danmu_to_video(video_url,ass_url)
+        logging.info(f"压制弹幕视频结束")
 
     # 4、利用auto-slice-video自动完成切片功能
-    ass_path = ass_file
-    video_path = video_file
     # 传入视频及弹幕文件进行智能切片,对一段视频提取 3 条高能片段，每个片段 300 秒，允许最大重叠 60 秒。
     logging.info("切片开始")
-    output_video_path = slice_video_by_danmaku(ass_path, video_path, 300, 3, 60, 1)
+    output_video_path = slice_video_by_danmaku(ass_url, video_url, 300, 3, 60, 1)
     logging.info("切片结束")
 
-    cover_url = os.path.splitext(file_path)[0] + '.jpg'
+    # 获取封面
+    cover_url = os.path.splitext(xml_url)[0] + '.jpg'
     # 5、上传自媒体网站
     for path in output_video_path:
         logging.info(path)
         await upload.upload_to_bilibili("猪小杰123",path,cover_url)
 
-    logging.info("开始清理文件")
+    logging.info("清理文件开始")
     # 6、检测上传成功后，删除源文件释放空间
-    os.remove(file_path)
-    logging.info(f"文件已清理：{file_path}" )
-    os.remove(ass_path)
-    logging.info(f"文件已清理：{ass_path}")
-    os.remove(video_path)
-    logging.info(f"文件已清理：{video_path}")
-
-
-    for path in output_video_path:
-        os.remove(Path(path))
-        logging.info(f"文件已清理：{path}")
-    os.remove(cover_url)
-    logging.info(f"文件已清理：{cover_url}")
-
-    logging.info(f"处理完成: {file_path}")
+    utils.delete_files_containing_keyword(Path(xml_url).parent,Path(xml_url).stem,False,False)
+    logging.info("清理文件结束")
+    logging.info(f"处理完成: {xml_url}")
     # input("按回车键退出...")
 
 # 检测xml文件最后修改时间，如果大于5分钟，则开始执行切片上传操作
