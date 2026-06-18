@@ -105,11 +105,12 @@ def delete_files_containing_keyword(directory, keyword, recursive=False, dry_run
         iterator = path.glob("*")    # 仅当前目录
 
     for item in iterator:
-        if item.is_file() and keyword in item.name:
+        if item.is_file() and keyword in item.name and 'PART' not in item:
             if dry_run:
                 print(f"[模拟] 将删除: {item}")
             else:
                 try:
+                    if item.con
                     item.unlink()   # 删除文件
                     print(f"[已删除] {item}")
                     deleted_count += 1

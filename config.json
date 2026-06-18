@@ -1,21 +1,29 @@
 {
   "live_stream" : [
     {
-        "up": "OK林仔",
-        "conver_img_url": "C:\\Users\\JQJ\\Downloads\\斗鱼\\ok林仔\\cover.png",
-        "xml_url": "C:\\Users\\JQJ\\Downloads\\斗鱼\\ok林仔\\test",
-        "tag": ""
+      "up": "OK林仔",
+      "conver_img_url": "C:\\Users\\JQJ\\Downloads\\斗鱼\\ok林仔\\cover.png",
+      "xml_url": "C:\\Users\\JQJ\\Downloads\\斗鱼\\debug",
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
+      "press_danmu_to_video": true
     },
     {
-      "up": ""
+      "up": "Minana呀",
+      "conver_img_url": "C:\\Users\\JQJ\\Downloads\\斗鱼\\Minana呀\\cover.png",
+      "xml_url": "C:\\Users\\JQJ\\Downloads\\斗鱼\\Minana呀",
+      "tid": 129,
+      "tags": ["Minana呀", "舞蹈", "性感"],
+      "press_danmu_to_video": false
     }
   ],
-  "upload_account" : {
-    "bilibili" : [
-      {
-        "sessdata": "e35e940a%2C1796701790%2Cf657a%2A62CjDo4ZTHqe_im7o2GTvVCOFuhq6Q9nogBxwSXHBAwQDpBur1ebWUonTK9r43GjU7sgYSVmFTZ1owU2d5dlQwYnNud2NCTG9fVHZnZlRHYlVjMmRrX1dVdEZVSEZjQVlKSXREQVNIeUszUS1FYVBaOXdJMndwSGoyWnpWNGJzVmpIT1JSai1uMmxRIIEC",
-        "bili_jct": "f43703674f1c47995c218f600a45099b"
-      }
-    ]
-  }
+  "upload_account" : [
+    {
+      "platform" : "bilibili",
+      "uname": "猪小杰123",
+      "sessdata": "e35e940a%2C1796701790%2Cf657a%2A62CjDo4ZTHqe_im7o2GTvVCOFuhq6Q9nogBxwSXHBAwQDpBur1ebWUonTK9r43GjU7sgYSVmFTZ1owU2d5dlQwYnNud2NCTG9fVHZnZlRHYlVjMmRrX1dVdEZVSEZjQVlKSXREQVNIeUszUS1FYVBaOXdJMndwSGoyWnpWNGJzVmpIT1JSai1uMmxRIIEC",
+      "bili_jct": "f43703674f1c47995c218f600a45099b"
+    }
+  ],
+  "DanmakuFactory_url": "D:\\study\\auto-payday\\DanmakuFactory-dev-windows-x64-CLI\\DanmakuFactory.exe"
 }
