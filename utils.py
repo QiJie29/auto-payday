@@ -60,7 +60,7 @@ def parse_douyu_danmaku(xml_url: str):
 
 # 将弹幕压制到视频中
 def press_danmu_to_video(video_url: str,ass_url: str):
-    video_danmu_url = os.path.splitext(video_url)[0] + '弹幕版.flv'
+    video_danmu_url = os.path.splitext(video_url)[0] + '弹幕版' + os.path.splitext(video_url)[1]
 
     work_dir = Path(video_url).parent
     original_dir = os.getcwd()
@@ -110,7 +110,6 @@ def delete_files_containing_keyword(directory, keyword, recursive=False, dry_run
                 print(f"[模拟] 将删除: {item}")
             else:
                 try:
-                    if item.con
                     item.unlink()   # 删除文件
                     print(f"[已删除] {item}")
                     deleted_count += 1
