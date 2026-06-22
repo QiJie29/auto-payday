@@ -5,6 +5,7 @@ from asyncio import sleep
 from pathlib import Path
 
 from bilibili_api import sync, video_uploader, Credential, user, channel_series, video
+from bilibili_api.channel_series import ChannelSeries
 from bilibili_api.utils.network import Api
 
 import utils
@@ -102,3 +103,13 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
   # 2. 等待视频审核完成（智能检测，而不是固定等待）
     logging.info("等待视频审核完成...")
     is_ready = await wait_for_video_ready(cut_video_url,bvid, credential)
+
+    # 创建 ChannelSeries 实例
+    # series = ChannelSeries(credential)
+    #
+    # # 将视频添加到合集
+    # # 注意：具体方法名可能因版本而异，常见的有 add_video 或类似方法
+    # result = await series.add_video("12312", aid)
+    # # 或者
+    # # result = await series.add_episode(season_id, aid)
+    # print(f"视频已添加到合集！")

@@ -4,7 +4,6 @@ import os
 import subprocess
 from pathlib import Path
 
-
 # 读取login文件
 def load_json_config(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -105,7 +104,7 @@ def delete_files_containing_keyword(directory, keyword, recursive=False, dry_run
         iterator = path.glob("*")    # 仅当前目录
 
     for item in iterator:
-        if item.is_file() and keyword in item.name and 'PART' not in item:
+        if item.is_file() and keyword in item.name and "PART" not in item.name:
             if dry_run:
                 print(f"[模拟] 将删除: {item}")
             else:
@@ -120,3 +119,7 @@ def delete_files_containing_keyword(directory, keyword, recursive=False, dry_run
         print(f"\n模拟运行结束，共匹配到 {deleted_count} 个文件（未实际删除）")
     else:
         print(f"\n实际删除完成，共删除 {deleted_count} 个文件")
+
+def get_up(xml_rul: str):
+    p = Path(xml_rul)
+    return p.parent.name
