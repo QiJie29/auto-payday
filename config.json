@@ -3,9 +3,32 @@
     {
       "up": "OK林仔",
       "conver_img_url": "",
-      "xml_url": "C:\\Users\\JQJ\\Downloads\\斗鱼\\OK林仔",
+      "xml_url": "D:\\live_stream\\斗鱼\\OK林仔",
       "tid": 28,
       "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
+      "enabled": true,
+      "press_danmu_to_video": true,
+      "upload": true,
+      "remove_original_file": true
+    },
+    {
+      "up": "debug",
+      "conver_img_url": "",
+      "xml_url": "D:\\live_stream\\斗鱼\\debug",
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
+      "enabled": false,
+      "press_danmu_to_video": true,
+      "upload": false,
+      "remove_original_file": false
+    },
+    {
+      "up": "zard1991",
+      "conver_img_url": "",
+      "xml_url": "D:\\live_stream\\斗鱼\\zard1991",
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "zard1991", "zard", "翔哥"],
+      "enabled": false,
       "press_danmu_to_video": true,
       "upload": true,
       "remove_original_file": true
@@ -13,9 +36,10 @@
     {
       "up": "Minana呀",
       "conver_img_url": "",
-      "xml_url": "C:\\Users\\JQJ\\Downloads\\斗鱼\\Minana呀",
+      "xml_url": "D:\\live_stream\\斗鱼\\Minana呀",
       "tid": 129,
-      "tags": ["Minana呀", "舞蹈", "性感"],
+      "tags": ["Minana呀", "舞蹈", "性感", "米娜"],
+      "enabled": true,
       "press_danmu_to_video": false,
       "upload": true,
       "remove_original_file": true
@@ -26,7 +50,10 @@
       "platform" : "bilibili",
       "uname": "猪小杰123",
       "sessdata": "e35e940a%2C1796701790%2Cf657a%2A62CjDo4ZTHqe_im7o2GTvVCOFuhq6Q9nogBxwSXHBAwQDpBur1ebWUonTK9r43GjU7sgYSVmFTZ1owU2d5dlQwYnNud2NCTG9fVHZnZlRHYlVjMmRrX1dVdEZVSEZjQVlKSXREQVNIeUszUS1FYVBaOXdJMndwSGoyWnpWNGJzVmpIT1JSai1uMmxRIIEC",
-      "bili_jct": "f43703674f1c47995c218f600a45099b"
+      "bili_jct": "f43703674f1c47995c218f600a45099b",
+      "DedeUserID": 382551067,
+      "buvid3": "D7998BEB-8188-7A96-9906-BFE5FD8655F567002infoc",
+      "buvid4": "92C040D7-A628-90FD-8B41-238E16ED824C62902-025021603-aA6QBEamBvVmbh8zFM2fQw%3D%3D"
     }
   ],
   "DanmakuFactory_url": "D:\\study\\auto-payday\\DanmakuFactory-dev-windows-x64-CLI\\DanmakuFactory.exe"

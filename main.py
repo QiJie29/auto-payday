@@ -13,16 +13,12 @@ async def main():
     # 你的监控路径列表
     config = utils.load_json_config('config.json')
 
-    # directories = [
-    #     get_value_by_key_recursive(config, "up", "OK林仔", "xml_url"),
-    #     get_value_by_key_recursive(config, "up", "Minana呀", "xml_url")
-    # ]
-
     directories = []
 
     for live_stream in config['live_stream'] :
         # print(live_stream['xml_url'])
-        directories.append(live_stream['xml_url'])
+        if live_stream['enabled']:
+            directories.append(live_stream['xml_url'])
 
     # 创建所有监控任务
     tasks = [
