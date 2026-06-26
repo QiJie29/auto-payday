@@ -24,42 +24,52 @@ async def custom_process(xml_url):
     """
     logging.info(f"开始处理视频文件: {xml_url}")
     # 示例：打印文件大小
-    file_size = os.path.getsize(xml_url) / (1024 * 1024)
-    logging.info(f"文件大小: {file_size:.2f} MB")
+    file_size = os.path.getsize(xml_url) / (1024)
+    logging.info(f"文件大小: {file_size:.2f} KB")
 
     # 获取主播名称
     up = utils.get_up(xml_url)
-
-    # 2、录制完成后将弹幕从xml转换为ass格式
-    logging.info(f"生成ass文件开始")
-    ass_url = utils.parse_douyu_danmaku(xml_url)
-    # ass_url = f'{Path(xml_url).parent}\\2026-06-16 01-42-23-397 顶级一号位教学，五黑有位置 by bililive_tools.ass'
-    logging.info(f"生成ass文件结束{ass_url}")
-
-    video_url = os.path.splitext(xml_url)[0] + '.mp4'
-    press_video_url = video_url
     config = utils.load_json_config('config.json')
-    if utils.get_value_by_key_recursive(config,"up",up,"press_danmu_to_video") :
-        # 3、调用 FFmpeg 压制视频
-        logging.info(f"压制弹幕视频开始")
-        video_danmu_url = utils.press_danmu_to_video(video_url,ass_url)
-        logging.info(f"压制弹幕视频结束")
-        # 如果需要压制，则将压制完成的视频传入函数进行切片
-        press_video_url = video_danmu_url
 
-    # 4、利用auto-slice-video自动完成切片功能
-    # 传入视频及弹幕文件进行智能切片,对一段视频提取 3 条高能片段，每个片段 300 秒，允许最大重叠 60 秒。
-    logging.info("切片开始")
-    output_video_path = slice_video_by_danmaku(ass_url, press_video_url, 300, 3, 60, 1)
-    logging.info("切片结束")
+    # 如果xml文件小于等于10KB，将相关文件直接清除即可
+    if file_size <= 10:
+        logging.info("检测到xml文件大小小于等于10KB，直接进入清理代码")
+    else:
+        # 2、录制完成后将弹幕从xml转换为ass格式
+        logging.info(f"生成ass文件开始")
+        ass_url = utils.parse_douyu_danmaku(xml_url)
+        # ass_url = f'{Path(xml_url).parent}\\2026-06-16 01-42-23-397 顶级一号位教学，五黑有位置 by bililive_tools.ass'
+        logging.info(f"生成ass文件结束{ass_url}")
 
-    # 获取封面
-    cover_url = os.path.splitext(xml_url)[0] + '.jpg'
-    # 5、上传自媒体网站
-    if utils.get_value_by_key_recursive(config, "up", up, "upload"):
-        for path in output_video_path:
-            logging.info(path)
-            await upload.upload_to_bilibili("猪小杰123",path,cover_url)
+        video_url = os.path.splitext(xml_url)[0] + '.mp4'
+        press_video_url = video_url
+
+        if utils.get_value_by_key_recursive(config,"up",up,"press_danmu_to_video") :
+            # 3、调用 FFmpeg 压制视频
+            logging.info(f"压制弹幕视频开始")
+            video_danmu_url = utils.press_danmu_to_video(video_url,ass_url)
+            logging.info(f"压制弹幕视频结束")
+            # 如果需要压制，则将压制完成的视频传入函数进行切片
+            press_video_url = video_danmu_url
+
+        # 4、利用auto-slice-video自动完成切片功能
+        # 传入视频及弹幕文件进行智能切片,对一段视频提取 3 条高能片段，每个片段 300 秒，允许最大重叠 60 秒。
+        logging.info("切片开始")
+        output_video_path = slice_video_by_danmaku(ass_url, press_video_url, 300, 3, 60, 1)
+        logging.info("切片结束")
+
+        # 获取封面
+        cover_url = os.path.splitext(xml_url)[0] + '.jpg'
+        # 5、上传自媒体网站（此处尝试开启并发，多个视频一起上传）
+        if utils.get_value_by_key_recursive(config, "up", up, "upload"):
+            for path in output_video_path:
+                logging.info(path)
+                await upload.upload_to_bilibili("猪小杰123",path,cover_url)
+            # tasks = [
+            #     await upload.upload_to_bilibili("猪小杰123",path,cover_url)
+            #     for path in output_video_path
+            # ]
+            # await asyncio.gather(*tasks)
 
     logging.info("清理文件开始")
     # 6、检测上传成功后，删除源文件释放空间

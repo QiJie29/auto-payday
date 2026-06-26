@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import platform
 import subprocess
 from pathlib import Path
 
@@ -55,15 +56,32 @@ def parse_douyu_danmaku(xml_url: str):
     ass_url = os.path.splitext(xml_url)[0] + '.ass'
     # 如果ass文件已经存在则删除重新生成
     if os.path.isfile(ass_url):
+        logging.info("检测到ass文件已经存在，执行删除操作")
         os.remove(ass_url)
 
-    cmd = f'"{danmakuFactory_path}" -o "{ass_url}" -i "{xml_url}"'
-    subprocess.run(cmd, shell=True, check=True)
+    # cmd = f'"{danmakuFactory_path}" -o "{ass_url}" -i "{xml_url}"'
+    # subprocess.run(cmd, shell=True, check=True)
+
+    # 优化cmd调用，copy本机环境
+    cmd = [
+        f"{danmakuFactory_path}",
+        "-o",
+        f"{ass_url}",
+        "-i",
+        f"{xml_url}"
+    ]
+
+    # 关键：使用当前进程的完整环境变量（等同于CMD的环境）
+    result = subprocess.run(cmd, env=os.environ.copy(), capture_output=True, text=True)
     return ass_url
 
 # 将弹幕压制到视频中
 def press_danmu_to_video(video_url: str,ass_url: str):
     video_danmu_url = os.path.splitext(video_url)[0] + '弹幕版' + os.path.splitext(video_url)[1]
+
+    if os.path.isfile(video_danmu_url):
+        logging.info("检测到视频弹幕版文件已经存在，执行删除操作")
+        os.remove(video_danmu_url)
 
     work_dir = Path(video_url).parent
     original_dir = os.getcwd()
@@ -74,7 +92,6 @@ def press_danmu_to_video(video_url: str,ass_url: str):
         ass_name = Path(ass_url).name
         output_name = Path(video_danmu_url).name
         cmd = f'ffmpeg -i "{video_name}" -vf "ass={ass_name}" -c:a copy "{output_name}"'
-        # cmd = f'ffmpeg -i "{video_name}" -vf "subtitles={ass_name}:force_style=FontName=Segoe UI Emoji" -c:a copy "{output_name}"'
         subprocess.run(cmd, shell=True, check=True)
         logging.info(f"弹幕压制成功: {video_danmu_url}")
         return video_danmu_url
@@ -292,4 +309,61 @@ async def get_seasons(uname: str):
         print(f"获取失败: {e}")
         import traceback
         traceback.print_exc()
+        return None
+
+# 根据aid获取视频状态，是否上传到合集中
+def get_video_info(aid):
+    """
+    获取视频详细信息，包括它所属的合集
+    使用更稳定的接口和完整的请求头
+    """
+    # 使用更稳定的接口
+    url = f"https://api.bilibili.com/x/web-interface/view?aid={aid}"
+
+    # 添加完整的请求头，模拟浏览器行为
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.bilibili.com/',  # 关键：必须添加 Referer
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Origin': 'https://www.bilibili.com'
+    }
+
+    try:
+        print(f"📤 查询视频信息: AID={aid}")
+        response = requests.get(url, headers=headers, timeout=10)
+        print(f"   HTTP状态: {response.status_code}")
+
+        if response.status_code == 200:
+            data = response.json()
+
+            if data.get('code') == 0:
+                video_data = data.get('data', {})
+                season = video_data.get('season', {})
+
+                print(f"\n📹 视频标题: {video_data.get('title')}")
+                print(f"📊 视频状态: 已发布")
+
+                if season and season.get('season_id'):
+                    print(f"📁 所属合集ID: {season.get('season_id')}")
+                    print(f"   合集名称: {season.get('title', '未知')}")
+                    print(f"   合集内排序: {season.get('position', '未知')}")
+                else:
+                    print("📁 该视频未加入任何合集")
+
+                return season
+            else:
+                print(f"❌ API返回错误: {data.get('message')}")
+                return None
+        else:
+            print(f"❌ HTTP请求失败: {response.status_code}")
+            print(f"   响应内容: {response.text[:200]}")
+            return None
+
+    except requests.exceptions.JSONDecodeError:
+        print(f"❌ 响应不是有效的JSON格式")
+        print(f"   原始响应: {response.text[:200]}")
+        return None
+    except Exception as e:
+        print(f"❌ 请求异常: {e}")
         return None

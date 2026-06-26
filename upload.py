@@ -65,11 +65,7 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     # 1. 设置认证信息
     # B站用户cookie等数据
     config = utils.load_json_config('config.json')
-    credential = Credential(
-        sessdata=utils.get_value_by_key_recursive(config,"uname",uname,"sessdata"),
-        bili_jct=utils.get_value_by_key_recursive(config,"uname",uname,"bili_jct"),
-        # buvid3="你的buvid3"  # 可选
-    )
+    credential = utils.get_credential(uname)
 
     # 2. 设置视频元信息
     # 从视频路径中提取时间信息
