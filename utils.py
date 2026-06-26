@@ -3,6 +3,7 @@ import logging
 import os
 import platform
 import subprocess
+import time
 from pathlib import Path
 
 from abstract_utilities import requests
@@ -240,75 +241,73 @@ def create_season(uname: str,title: str,desc: str,cover_url: str):
         traceback.print_exc()
         return None
 
-async def get_seasons(uname: str):
-    config = load_json_config('config.json')
-    # 替换为你想查询的B站用户ID（数字UID）
-    uid = get_value_by_key_recursive(config, "uname", uname, "DedeUserID"),  # 例如：12345678
+def get_seasons(uname: str):
+    """
+    获取当前用户的所有合集（Season）列表
+    """
+    sessdata = get_cookies(uname).get("SESSDATA")
+    bili_jct = get_cookies(uname).get("bili_jct")
 
-    # 初始化用户对象
-    u = user.User(uid)
+    # 1. 构建请求URL
+    url = "https://member.bilibili.com/x2/creative/web/seasons"
+
+    # 2. 设置请求参数（分页等）
+    params = {
+        "pn": 1,  # 页码
+        "ps": 30,  # 每页数量
+        "order": "mtime",  # 按修改时间排序
+        "sort": "desc"  # 降序
+    }
+
+    # 3. 设置Cookie
+    cookies = {
+        'SESSDATA': sessdata,
+        'bili_jct': bili_jct
+    }
+
+    # 4. 设置请求头
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://member.bilibili.com/'
+    }
 
     try:
-        # 获取用户的合集（频道系列）
-        channels = await u.get_channels()
+        response = requests.get(url, headers=headers, cookies=cookies, params=params)
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('code') == 0:
+                # 此处不返回数据集，直接打印出来
+                # return result.get('data', {})
+                data = result.get('data')
+                print(data)
+                if data:
+                    seasons = data.get('seasons', [])
+                    print(f"找到 {len(seasons)} 个合集:\n")
 
-        print(f"用户 {uid} 的合集列表：")
-        print("=" * 60)
+                    for season in seasons:
+                        season_id = season.get('season').get('id')
+                        season_title = season.get('season').get('title')
+                        print(f"📁 合集ID: {season_id}, 标题: {season_title}")
 
-        if not channels:
-            print("该用户暂无合集")
-            return []
-
-        # 遍历并解析每个 ChannelSeries 对象
-        for idx, channel in enumerate(channels, 1):
-            print(f"{idx}. 合集信息:")
-
-            # ChannelSeries 对象通常有以下属性或方法
-            # 尝试不同的方式获取信息
-            try:
-                # 方式1：直接访问属性
-                season_id = getattr(channel, 'id', None) or getattr(channel, 'season_id', None)
-                title = getattr(channel, 'name', None) or getattr(channel, 'title', None)
-                desc = getattr(channel, 'desc', None) or getattr(channel, 'description', None)
-                count = getattr(channel, 'count', None) or getattr(channel, 'video_count', 0)
-
-                # 如果属性不存在，尝试转换为字典
-                if not title:
-                    # 尝试获取对象的 __dict__ 属性
-                    if hasattr(channel, '__dict__'):
-                        channel_dict = channel.__dict__
-                        print(f"   对象属性: {channel_dict}")
-                        title = channel_dict.get('name') or channel_dict.get('title')
-                        season_id = channel_dict.get('id') or channel_dict.get('season_id')
-
-                # 如果还是获取不到，打印对象本身看看
-                if not title:
-                    print(f"   对象类型: {type(channel)}")
-                    print(f"   对象内容: {channel}")
-                    # 尝试调用对象的方法获取信息
-                    if hasattr(channel, 'get_info'):
-                        info = await channel.get_info()
-                        print(f"   获取到的信息: {info}")
-                        title = info.get('title') or info.get('name')
-                        season_id = info.get('id') or info.get('season_id')
-
-                print(f"   合集ID: {season_id}")
-                print(f"   标题: {title or '未命名'}")
-                print(f"   描述: {desc or '无描述'}")
-                print(f"   视频数: {count or 0}")
-
-            except Exception as e:
-                print(f"   解析失败: {e}")
-                print(f"   原始对象: {channel}")
-
-            print("-" * 40)
-
-        return channels
-
+                        # 获取该合集下的分段（Sections）信息
+                        sections = season.get('sections', {}).get('sections', [])
+                        if sections:
+                            print(f"   包含 {len(sections)} 个分段:")
+                            for section in sections:
+                                section_id = section.get('id')
+                                section_title = section.get('title')
+                                print(f"      🔹 分段ID: {section_id}, 标题: {section_title}")
+                        else:
+                            print("   该合集暂无分段。")
+                        print("-" * 30)
+            else:
+                print(f"API返回错误: {result.get('message')}")
+                return None
+        else:
+            print(f"HTTP请求失败: {response.status_code}")
+            return None
     except Exception as e:
-        print(f"获取失败: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"请求异常: {e}")
         return None
 
 # 根据aid获取视频状态，是否上传到合集中
@@ -340,8 +339,9 @@ def get_video_info(aid):
             if data.get('code') == 0:
                 video_data = data.get('data', {})
                 season = video_data.get('season', {})
-
+                print(f"\n📹 视频所有内容: {video_data}")
                 print(f"\n📹 视频标题: {video_data.get('title')}")
+                print(f"\n📹 视频cid: {video_data.get('cid')}")
                 print(f"📊 视频状态: 已发布")
 
                 if season and season.get('season_id'):
@@ -351,7 +351,7 @@ def get_video_info(aid):
                 else:
                     print("📁 该视频未加入任何合集")
 
-                return season
+                return video_data
             else:
                 print(f"❌ API返回错误: {data.get('message')}")
                 return None
@@ -364,6 +364,73 @@ def get_video_info(aid):
         print(f"❌ 响应不是有效的JSON格式")
         print(f"   原始响应: {response.text[:200]}")
         return None
+    except Exception as e:
+        print(f"❌ 请求异常: {e}")
+        return None
+
+# 在视频上传完审批通过后调用该函数将视频加入合集中
+def add_video_to_season(season_id, section_id, aid, cid, sessdata, bili_jct, title=""):
+    """
+    精确模拟 @renmu/bili-api 的 addMedia2Season 方法
+    """
+    # 1. 构建请求 URL（带时间戳和 csrf）
+    timestamp = int(time.time() * 1000)  # 毫秒级时间戳
+    url = f"https://member.bilibili.com/x2/creative/web/season/section/episodes/add?t={timestamp}&csrf={bili_jct}"
+
+    # 2. 构建请求体（JSON 格式）
+    payload = {
+        "sectionId": int(section_id),
+        "episodes": [
+            {
+                "aid": int(aid),
+                "cid": int(cid),
+                "title": title
+            }
+        ],
+        "csrf": bili_jct
+    }
+
+    # 3. 构建请求头（模拟库的行为）
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Content-Type': 'application/json',  # 关键：使用 JSON 格式
+        'Accept': 'application/json, text/plain, */*',
+        'Origin': 'https://member.bilibili.com',
+        'Referer': f'https://member.bilibili.com/platform/season?season_id={season_id}',
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+
+    # 4. Cookie
+    cookies = {
+        'SESSDATA': sessdata,
+        'bili_jct': bili_jct
+    }
+
+    print(f"📤 发送请求:")
+    print(f"   URL: {url}")
+    print(f"   Payload: {json.dumps(payload, indent=2, ensure_ascii=False)}")
+
+    try:
+        # 5. 发送 POST 请求（使用 JSON 格式）
+        response = requests.post(
+            url,
+            headers=headers,
+            cookies=cookies,
+            json=payload,  # 使用 json= 自动设置 Content-Type 为 application/json
+            timeout=30
+        )
+
+        print(f"   HTTP状态: {response.status_code}")
+
+        if response.status_code == 200:
+            result = response.json()
+            print(f"   响应: {json.dumps(result, indent=2, ensure_ascii=False)}")
+            return result
+        else:
+            print(f"   HTTP错误: {response.status_code}")
+            print(f"   响应内容: {response.text[:500]}")
+            return None
+
     except Exception as e:
         print(f"❌ 请求异常: {e}")
         return None

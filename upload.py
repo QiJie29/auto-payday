@@ -76,6 +76,7 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     tags = utils.get_value_by_key_recursive(config, "xml_url", os.path.dirname(cut_video_url), "tags")
 
     title = f"【{up}】{time}直播精彩片段"
+    logging.info(f"开始上传{cut_video_url}")
     vu_meta = video_uploader.VideoMeta(
         title = title,
         tid = tid,  # 分区ID，比如 17 是“单机游戏”
@@ -94,18 +95,20 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     # 获取视频的 aid（注意是 aid，不是 bvid）
     aid = upload_result.get('aid')
     bvid = upload_result.get('bvid')
-    logging.info([aid])
+    logging.info(aid)
     logging.info(bvid)
-  # 2. 等待视频审核完成（智能检测，而不是固定等待）
+    # 2. 等待视频审核完成（智能检测，而不是固定等待）
     logging.info("等待视频审核完成...")
     is_ready = await wait_for_video_ready(cut_video_url,bvid, credential)
 
-    # 创建 ChannelSeries 实例
-    # series = ChannelSeries(credential)
-    #
-    # # 将视频添加到合集
-    # # 注意：具体方法名可能因版本而异，常见的有 add_video 或类似方法
-    # result = await series.add_video("12312", aid)
-    # # 或者
-    # # result = await series.add_episode(season_id, aid)
-    # print(f"视频已添加到合集！")
+    # 将视频添加到合集
+    if is_ready:
+        season_id = utils.get_value_by_key_recursive(config, "xml_url", os.path.dirname(cut_video_url), "season_id")
+        # 当json中存有合集id，才会执行加入合集的代码
+        if season_id != 0:
+            section_id = utils.get_value_by_key_recursive(config, "xml_url", os.path.dirname(cut_video_url), "section_id")
+            sessdata = utils.get_cookies(uname).get('SESSDATA')
+            bili_jct = utils.get_cookies(uname).get('bili_jct')
+
+            cid = utils.get_video_info(aid).get('cid')
+            utils.add_video_to_season(season_id,section_id,aid,cid,sessdata,bili_jct)

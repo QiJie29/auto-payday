@@ -2,47 +2,59 @@
   "live_stream" : [
     {
       "up": "OK林仔",
-      "conver_img_url": "",
-      "xml_url": "D:\\live_stream\\斗鱼\\OK林仔",
-      "tid": 28,
-      "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
       "enabled": true,
+      "xml_url": "D:\\live_stream\\斗鱼\\OK林仔",
+
       "press_danmu_to_video": true,
       "upload": true,
-      "remove_original_file": true
+      "remove_original_file": true,
+
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
+      "season_id": 8319296,
+      "section_id": 9248323
     },
     {
       "up": "debug",
-      "conver_img_url": "",
-      "xml_url": "D:\\live_stream\\斗鱼\\debug",
-      "tid": 28,
-      "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
       "enabled": false,
+      "xml_url": "D:\\live_stream\\斗鱼\\debug",
+
       "press_danmu_to_video": true,
       "upload": false,
-      "remove_original_file": false
+      "remove_original_file": false,
+
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
+      "season_id": 0,
+      "section_id": 0
     },
     {
       "up": "zard1991",
-      "conver_img_url": "",
-      "xml_url": "D:\\live_stream\\斗鱼\\zard1991",
-      "tid": 28,
-      "tags": ["Dota2", "刀塔2", "zard1991", "zard", "翔哥"],
       "enabled": false,
+      "xml_url": "D:\\live_stream\\斗鱼\\zard1991",
+
       "press_danmu_to_video": true,
       "upload": true,
-      "remove_original_file": true
+      "remove_original_file": true,
+
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "zard1991", "zard", "翔哥"],
+      "season_id": 8420062,
+      "section_id": 9375516
     },
     {
       "up": "Minana呀",
-      "conver_img_url": "",
-      "xml_url": "D:\\live_stream\\斗鱼\\Minana呀",
-      "tid": 129,
-      "tags": ["Minana呀", "舞蹈", "性感", "米娜"],
       "enabled": true,
+      "xml_url": "D:\\live_stream\\斗鱼\\Minana呀",
+
       "press_danmu_to_video": false,
       "upload": true,
-      "remove_original_file": true
+      "remove_original_file": true,
+
+      "tid": 129,
+      "tags": ["Minana呀", "舞蹈", "性感", "米娜"],
+      "season_id": 0,
+      "section_id": 0
     }
   ],
   "upload_account" : [

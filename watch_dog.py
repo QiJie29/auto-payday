@@ -62,14 +62,14 @@ async def custom_process(xml_url):
         cover_url = os.path.splitext(xml_url)[0] + '.jpg'
         # 5、上传自媒体网站（此处尝试开启并发，多个视频一起上传）
         if utils.get_value_by_key_recursive(config, "up", up, "upload"):
-            for path in output_video_path:
-                logging.info(path)
-                await upload.upload_to_bilibili("猪小杰123",path,cover_url)
-            # tasks = [
+            # for path in output_video_path:
+            #     logging.info(path)
             #     await upload.upload_to_bilibili("猪小杰123",path,cover_url)
-            #     for path in output_video_path
-            # ]
-            # await asyncio.gather(*tasks)
+            tasks = [
+                upload.upload_to_bilibili("猪小杰123",path,cover_url)
+                for path in output_video_path
+            ]
+            await asyncio.gather(*tasks)
 
     logging.info("清理文件开始")
     # 6、检测上传成功后，删除源文件释放空间
