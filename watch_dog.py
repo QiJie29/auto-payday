@@ -31,9 +31,14 @@ async def custom_process(xml_url):
     up = utils.get_up(xml_url)
     config = utils.load_json_config('config.json')
 
-    # 如果xml文件小于等于10KB，将相关文件直接清除即可
-    if file_size <= 10:
-        logging.info("检测到xml文件大小小于等于10KB，直接进入清理代码")
+    # 获取视频链接
+    video_url = os.path.splitext(xml_url)[0] + '.mp4'
+
+    # 如果xml文件小于等于50KB，将相关文件直接清除即可
+    if file_size <= 50:
+        logging.info("检测到xml文件大小小于等于50KB，直接进入清理代码")
+    elif not os.path.isfile(video_url):
+        logging.info("未检测到对应的mp4视频文件，直接进入清理代码")
     else:
         # 2、录制完成后将弹幕从xml转换为ass格式
         logging.info(f"生成ass文件开始")
@@ -41,7 +46,7 @@ async def custom_process(xml_url):
         # ass_url = f'{Path(xml_url).parent}\\2026-06-16 01-42-23-397 顶级一号位教学，五黑有位置 by bililive_tools.ass'
         logging.info(f"生成ass文件结束{ass_url}")
 
-        video_url = os.path.splitext(xml_url)[0] + '.mp4'
+
         press_video_url = video_url
 
         if utils.get_value_by_key_recursive(config,"up",up,"press_danmu_to_video") :
