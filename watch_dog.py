@@ -3,6 +3,7 @@ import subprocess
 import time
 import os
 import logging
+import traceback
 from datetime import datetime, timedelta
 
 from pathlib import Path
@@ -46,10 +47,13 @@ async def custom_process(xml_url):
         # ass_url = f'{Path(xml_url).parent}\\2026-06-16 01-42-23-397 顶级一号位教学，五黑有位置 by bililive_tools.ass'
         logging.info(f"生成ass文件结束{ass_url}")
 
-
+        # 默认赋值视频路径
         press_video_url = video_url
 
+        # 如需压制弹幕则调用ffmpeg
         if utils.get_value_by_key_recursive(config,"up",up,"press_danmu_to_video") :
+            # 检测是否已经压制切片完成，如果已经压制切片完成，直接给output_video_path赋值，然后跳过压制和切片环节
+            # TODOLIST
             # 3、调用 FFmpeg 压制视频
             logging.info(f"压制弹幕视频开始")
             video_danmu_url = utils.press_danmu_to_video(video_url,ass_url)
@@ -60,21 +64,29 @@ async def custom_process(xml_url):
         # 4、利用auto-slice-video自动完成切片功能
         # 传入视频及弹幕文件进行智能切片,对一段视频提取 3 条高能片段，每个片段 300 秒，允许最大重叠 60 秒。
         logging.info("切片开始")
-        output_video_path = slice_video_by_danmaku(ass_url, press_video_url, 300, 3, 60, 1)
+        try:
+            # utils.escape_ass_text_commas(ass_url)
+            output_video_path = slice_video_by_danmaku(ass_url, press_video_url, 300, 3, 60, 1)
+        except Exception as e:
+            print("捕获到异常：")
+            traceback.print_exc()  # 这会打印完整的调用栈，告诉你具体是哪一行代码报错
         logging.info("切片结束")
 
         # 获取封面
         cover_url = os.path.splitext(xml_url)[0] + '.jpg'
-        # 5、上传自媒体网站（此处尝试开启并发，多个视频一起上传）
+        # 5、上传自媒体网站
         if utils.get_value_by_key_recursive(config, "up", up, "upload"):
-            # for path in output_video_path:
-            #     logging.info(path)
-            #     await upload.upload_to_bilibili("猪小杰123",path,cover_url)
-            tasks = [
-                upload.upload_to_bilibili("猪小杰123",path,cover_url)
-                for path in output_video_path
-            ]
-            await asyncio.gather(*tasks)
+            # 单个视频上传
+            for path in output_video_path:
+                logging.info(path)
+                await upload.upload_to_bilibili("猪小杰123",path,cover_url)
+
+            # 开启并发，多个视频一起上传（需要解决上传频率过高问题，要增加延时）
+            #tasks = [
+            #    upload.delayed_upload("猪小杰123",path,cover_url,i * 5)
+            #   for i,path in output_video_path
+            #]
+            #await asyncio.gather(*tasks)
 
     logging.info("清理文件开始")
     # 6、检测上传成功后，删除源文件释放空间

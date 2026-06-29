@@ -434,3 +434,24 @@ def add_video_to_season(season_id, section_id, aid, cid, sessdata, bili_jct, tit
     except Exception as e:
         print(f"❌ 请求异常: {e}")
         return None
+
+
+def escape_ass_text_commas(ass_path):
+    """将 ASS 文件 Text 字段中的逗号替换为中文逗号，避免干扰解析"""
+    with open(ass_path, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    new_lines = []
+    for line in lines:
+        if line.startswith('Dialogue:'):
+            # 将 Text 字段中的英文逗号替换为中文逗号
+            # 注意：保留前 9 个逗号作为分隔符，只替换第 10 个之后的逗号
+            parts = line.split(',', 9)  # 最多分割 9 次，保留 Text 字段整体
+            if len(parts) == 10:
+                # 替换 Text 字段内的逗号
+                parts[9] = parts[9].replace(',', '，')
+                line = ','.join(parts)
+        new_lines.append(line)
+
+    with open(ass_path, 'w', encoding='utf-8') as f:
+        f.writelines(new_lines)

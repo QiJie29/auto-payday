@@ -70,10 +70,11 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     # 2. 设置视频元信息
     # 从视频路径中提取时间信息
     time = Path(cut_video_url).stem.split('_', 1)[1]
+    # print(cut_video_url)
     # 从视频路径中的父目录提取主播名称
-    up = utils.get_value_by_key_recursive(config,"xml_url",os.path.dirname(cut_video_url),"up")
-    tid = utils.get_value_by_key_recursive(config,"xml_url",os.path.dirname(cut_video_url),"tid")
-    tags = utils.get_value_by_key_recursive(config, "xml_url", os.path.dirname(cut_video_url), "tags")
+    up = os.path.basename(os.path.dirname(cut_video_url))
+    tid = utils.get_value_by_key_recursive(config,'up',up,'tid')
+    tags = utils.get_value_by_key_recursive(config,'up',up,'tags')
 
     title = f"【{up}】{time}直播精彩片段"
     logging.info(f"开始上传{cut_video_url}")
@@ -95,20 +96,25 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     # 获取视频的 aid（注意是 aid，不是 bvid）
     aid = upload_result.get('aid')
     bvid = upload_result.get('bvid')
-    logging.info(aid)
-    logging.info(bvid)
+    # logging.info(aid)
+    # logging.info(bvid)
     # 2. 等待视频审核完成（智能检测，而不是固定等待）
     logging.info("等待视频审核完成...")
     is_ready = await wait_for_video_ready(cut_video_url,bvid, credential)
 
     # 将视频添加到合集
     if is_ready:
-        season_id = utils.get_value_by_key_recursive(config, "xml_url", os.path.dirname(cut_video_url), "season_id")
+        season_id = utils.get_value_by_key_recursive(config, "up", up, "season_id")
         # 当json中存有合集id，才会执行加入合集的代码
         if season_id != 0:
-            section_id = utils.get_value_by_key_recursive(config, "xml_url", os.path.dirname(cut_video_url), "section_id")
+            section_id = utils.get_value_by_key_recursive(config, "up", up, "section_id")
             sessdata = utils.get_cookies(uname).get('SESSDATA')
             bili_jct = utils.get_cookies(uname).get('bili_jct')
 
             cid = utils.get_video_info(aid).get('cid')
-            utils.add_video_to_season(season_id,section_id,aid,cid,sessdata,bili_jct)
+            utils.add_video_to_season(season_id,section_id,aid,cid,sessdata,bili_jct,title)
+            logging.info(f"合集添加成功{cut_video_url}")
+
+async def delayed_upload(username, path, cover_url, delay):
+    await asyncio.sleep(delay)        # 先等待指定秒数
+    return await upload_to_bilibili(username, path, cover_url)

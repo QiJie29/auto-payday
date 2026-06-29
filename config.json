@@ -1,16 +1,14 @@
 {
-  "live_stream" : [
+  "live_stream": [
     {
-      "up": "OK林仔",
+      "up": "ok林仔",
       "enabled": true,
-      "xml_url": "D:\\live_stream\\斗鱼\\OK林仔",
-
-      "press_danmu_to_video": true,
+      "xml_url": "D:\\live_stream\\斗鱼\\ok林仔",
+      "press_danmu_to_video": false,
       "upload": true,
       "remove_original_file": true,
-
       "tid": 28,
-      "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
+      "tags": ["Dota2", "刀塔2", "ok林仔", "林仔"],
       "season_id": 8319296,
       "section_id": 9248323
     },
@@ -18,13 +16,11 @@
       "up": "debug",
       "enabled": false,
       "xml_url": "D:\\live_stream\\斗鱼\\debug",
-
       "press_danmu_to_video": true,
       "upload": false,
       "remove_original_file": false,
-
       "tid": 28,
-      "tags": ["Dota2", "刀塔2", "OK林仔", "林仔"],
+      "tags": ["Dota2", "刀塔2", "ok林仔", "林仔"],
       "season_id": 0,
       "section_id": 0
     },
@@ -32,11 +28,9 @@
       "up": "zard1991",
       "enabled": false,
       "xml_url": "D:\\live_stream\\斗鱼\\zard1991",
-
       "press_danmu_to_video": true,
       "upload": true,
       "remove_original_file": true,
-
       "tid": 28,
       "tags": ["Dota2", "刀塔2", "zard1991", "zard", "翔哥"],
       "season_id": 8420062,
@@ -46,15 +40,13 @@
       "up": "Minana呀",
       "enabled": true,
       "xml_url": "D:\\live_stream\\斗鱼\\Minana呀",
-
       "press_danmu_to_video": false,
       "upload": true,
       "remove_original_file": true,
-
       "tid": 129,
       "tags": ["Minana呀", "舞蹈", "性感", "米娜"],
-      "season_id": 0,
-      "section_id": 0
+      "season_id": 8436320,
+      "section_id": 9394253
     }
   ],
   "upload_account" : [
