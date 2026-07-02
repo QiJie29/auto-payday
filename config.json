@@ -1,18 +1,6 @@
 {
   "live_stream": [
     {
-      "up": "ok林仔",
-      "enabled": true,
-      "xml_url": "D:\\live_stream\\斗鱼\\ok林仔",
-      "press_danmu_to_video": false,
-      "upload": true,
-      "remove_original_file": true,
-      "tid": 28,
-      "tags": ["Dota2", "刀塔2", "ok林仔", "林仔"],
-      "season_id": 8319296,
-      "section_id": 9248323
-    },
-    {
       "up": "debug",
       "enabled": false,
       "xml_url": "D:\\live_stream\\斗鱼\\debug",
@@ -25,16 +13,16 @@
       "section_id": 0
     },
     {
-      "up": "zard1991",
-      "enabled": false,
-      "xml_url": "D:\\live_stream\\斗鱼\\zard1991",
-      "press_danmu_to_video": true,
+      "up": "ok林仔",
+      "enabled": true,
+      "xml_url": "D:\\live_stream\\斗鱼\\ok林仔",
+      "press_danmu_to_video": false,
       "upload": true,
       "remove_original_file": true,
       "tid": 28,
-      "tags": ["Dota2", "刀塔2", "zard1991", "zard", "翔哥"],
-      "season_id": 8420062,
-      "section_id": 9375516
+      "tags": ["Dota2", "刀塔2", "ok林仔", "林仔"],
+      "season_id": 8319296,
+      "section_id": 9248323
     },
     {
       "up": "Minana呀",
@@ -47,14 +35,50 @@
       "tags": ["Minana呀", "舞蹈", "性感", "米娜"],
       "season_id": 8436320,
       "section_id": 9394253
+    },
+    {
+      "up": "zard1991",
+      "enabled": true,
+      "xml_url": "D:\\live_stream\\斗鱼\\zard1991",
+      "press_danmu_to_video": false,
+      "upload": true,
+      "remove_original_file": true,
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "zard1991", "zard", "翔哥"],
+      "season_id": 8420062,
+      "section_id": 9375516
+    },
+    {
+      "up": "Zhou陈尧",
+      "enabled": true,
+      "xml_url": "D:\\live_stream\\斗鱼\\Zhou陈尧",
+      "press_danmu_to_video": false,
+      "upload": true,
+      "remove_original_file": true,
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "Zhou", "陈尧", "鲷哥"],
+      "season_id": 8470443,
+      "section_id": 9432896
+    },
+    {
+      "up": "yyfyyf",
+      "enabled": true,
+      "xml_url": "D:\\live_stream\\斗鱼\\yyfyyf",
+      "press_danmu_to_video": false,
+      "upload": true,
+      "remove_original_file": true,
+      "tid": 28,
+      "tags": ["Dota2", "刀塔2", "yyf", "月夜枫", "峰哥"],
+      "season_id": 8471176,
+      "section_id": 9433802
     }
   ],
   "upload_account" : [
     {
       "platform" : "bilibili",
       "uname": "猪小杰123",
-      "sessdata": "4308325c%2C1797928723%2C14aed%2A61CjBaleoBJFQcvEhMAGHo1WolW_0De7PievFoRlj8jpoZv1wsXXjg1N8dIAYCx1jX4oYSVmoxcXRqak5SME5GSVNSbkhJS1RzZFJDemZROXI2a1RveTI0U19FZTY0RHRDOGhuUkpDOHVHRnJNcXpCWWhPNE12aWlYNHFGTkFnS3lGRUpCbTR4UkN3IIEC",
-      "bili_jct": "8cda2252e50dc96eee04b1780ce687af",
+      "sessdata": "3e6c956e%2C1798340825%2Caa260%2A62CjA8jDqgJ2F7Zsagw5zOW_I-8KfM3VGAR43N-7x-lpoZKgevc_wjfYHqvRxTp_cgFwkSVkdFbVBGQk1NRDV1WGU0ZG9TLW1Tcm9td3Z5R0R4ajhJWFFwRzhLazkzLTdCakY3WDdCSW5pYnFvYjZBci1Hd0tLYm1mQ0JNQ2duNG5MMGtVaWxoTGpnIIEC",
+      "bili_jct": "ae64df1b0a839140266864711782ed59",
       "DedeUserID": 382551067,
       "buvid3": "D7998BEB-8188-7A96-9906-BFE5FD8655F567002infoc",
       "buvid4": "92C040D7-A628-90FD-8B41-238E16ED824C62902-025021603-aA6QBEamBvVmbh8zFM2fQw%3D%3D"

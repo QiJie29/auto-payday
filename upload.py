@@ -69,6 +69,7 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
 
     # 2. 设置视频元信息
     # 从视频路径中提取时间信息
+    second = Path(cut_video_url).stem.split('_', 1)[0]
     time = Path(cut_video_url).stem.split('_', 1)[1]
     # print(cut_video_url)
     # 从视频路径中的父目录提取主播名称
@@ -77,12 +78,13 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     tags = utils.get_value_by_key_recursive(config,'up',up,'tags')
 
     title = f"【{up}】{time}直播精彩片段"
+    desc = f'直播时间：{time + second}'
     logging.info(f"开始上传{cut_video_url}")
     vu_meta = video_uploader.VideoMeta(
         title = title,
         tid = tid,  # 分区ID，比如 17 是“单机游戏”
         tags = tags,  # 注意参数名可能是 tags
-        desc = title,  # 注意参数名可能是 desc 或 description
+        desc = desc,  # 注意参数名可能是 desc 或 description
         cover = cover_url,
         # season_id=8319296      # 合集ID的准确参数名，请务必查阅文档确认！
     )

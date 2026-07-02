@@ -45,6 +45,7 @@ async def custom_process(xml_url):
         logging.info(f"生成ass文件开始")
         ass_url = utils.parse_douyu_danmaku(xml_url)
         # ass_url = f'{Path(xml_url).parent}\\2026-06-16 01-42-23-397 顶级一号位教学，五黑有位置 by bililive_tools.ass'
+        # ass_url = xml_url
         logging.info(f"生成ass文件结束{ass_url}")
 
         # 默认赋值视频路径

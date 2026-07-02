@@ -60,20 +60,20 @@ def parse_douyu_danmaku(xml_url: str):
         logging.info("检测到ass文件已经存在，执行删除操作")
         os.remove(ass_url)
 
-    # cmd = f'"{danmakuFactory_path}" -o "{ass_url}" -i "{xml_url}"'
+    cmd = f'"{danmakuFactory_path}" -o "{ass_url}" -i "{xml_url}"'
     # subprocess.run(cmd, shell=True, check=True)
 
     # 优化cmd调用，copy本机环境
-    cmd = [
-        f"{danmakuFactory_path}",
-        "-o",
-        f"{ass_url}",
-        "-i",
-        f"{xml_url}"
-    ]
+    # cmd = [
+    #     f"{danmakuFactory_path}",
+    #     "-o",
+    #     f"{ass_url}",
+    #     "-i",
+    #     f"{xml_url}"
+    # ]
 
     # 关键：使用当前进程的完整环境变量（等同于CMD的环境）
-    result = subprocess.run(cmd, env=os.environ.copy(), capture_output=True, text=True)
+    result = subprocess.run(cmd)
     return ass_url
 
 # 将弹幕压制到视频中
