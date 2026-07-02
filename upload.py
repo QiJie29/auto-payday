@@ -77,8 +77,7 @@ async def upload_to_bilibili(uname: str,cut_video_url: str,cover_url: str):
     tid = utils.get_value_by_key_recursive(config,'up',up,'tid')
     tags = utils.get_value_by_key_recursive(config,'up',up,'tags')
 
-    title = f"【{up}】{time}直播精彩片段"
-    desc = f'直播时间：{time + second}'
+    title, desc = utils.get_video_upload_information(cut_video_url)
     logging.info(f"开始上传{cut_video_url}")
     vu_meta = video_uploader.VideoMeta(
         title = title,

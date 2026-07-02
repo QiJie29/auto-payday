@@ -4,6 +4,7 @@ import os
 import platform
 import subprocess
 import time
+from datetime import timedelta, datetime
 from pathlib import Path
 
 from abstract_utilities import requests
@@ -455,3 +456,35 @@ def escape_ass_text_commas(ass_path):
 
     with open(ass_path, 'w', encoding='utf-8') as f:
         f.writelines(new_lines)
+
+# 日期增加秒数
+def add_seconds(time_str: str, x: int) -> datetime:
+    main, _ = time_str.rsplit('-', 1)  # main = "2026-07-02 01-57-03"
+    dt = datetime.strptime(main, "%Y-%m-%d %H-%M-%S")
+    return dt + timedelta(seconds=x)
+
+# 获取视频上传前的信息
+def get_video_upload_information(cut_video_url: str):
+    # 获取文件名称，例如1620s_2026-07-02 01-57-03-314 陪伴每一天
+    cut_video_name = Path(cut_video_url).stem
+    # 获取多少秒，例如1620
+    second = int(cut_video_name.split('_', 1)[0].split('s',1)[0])
+    # 获取原始视频的文件名称，例如2026-07-02 01-57-03-314 陪伴每一天
+    orginal_video_name = cut_video_name.split('_', 1)[1]
+    # 获取时间，例如2026-07-02 01-57-03-314
+    time = orginal_video_name.split(' ')[0] + ' ' + orginal_video_name.split(' ')[1]
+    # 获取开始时间，例如2026-07-02 02:24:03
+    begintime = add_seconds(time,second)
+    # 获取结束时间，例如2026-07-02 02:29:03
+    endtime = begintime + timedelta(seconds=300)
+
+    # 获取主播名称
+    up = os.path.basename(os.path.dirname(cut_video_url))
+
+    # 获取直播间标题
+    live_stream_title = orginal_video_name.split(' ')[2]
+    title = f"【{up}】{orginal_video_name}直播精彩片段"
+    desc = (f'直播标题：{live_stream_title}\n'
+            f'直播时间：{begintime} ~ {endtime}\n')
+
+    return title,desc
